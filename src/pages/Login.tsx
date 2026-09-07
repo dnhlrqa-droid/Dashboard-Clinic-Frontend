@@ -37,6 +37,7 @@ export default function Login() {
             }
 
         }catch(error) {
+            console.error(error);
             return setErrorMessage(errorCatch(error) || MESSAGES.ERROR_SERVER);
         }finally{
             setIsSubmitting(false);
@@ -55,7 +56,7 @@ export default function Login() {
                     <h1 className="text-3xl font-bold text-gray-100">Dental Clinic</h1>
                     { <div className={`flex items-center justify-center transform transition-all duration-100
                         ${errorMessage ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-5 scale-0"}`}>
-                         <p className="text-white bg-red-500/80 py-2 w-[80%] rounded-sm p-1">
+                         <p className="text-white bg-red-500/40 py-2 w-[80%] rounded-sm p-1">
                              <FontAwesomeIcon className="text-xl" icon={faCircleExclamation} />
                            {errorMessage}
                         </p>
