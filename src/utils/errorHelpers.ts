@@ -36,5 +36,7 @@ export function errorCatch(error: unknown) {
 
       if(Error.status === 429) return Error.data.message;
       if(Error.status === 500) return Error.data.message;
+
+      return MESSAGES.ERROR_SERVER
    
 };
