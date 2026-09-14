@@ -112,3 +112,5 @@ export function getConditionTags(history: medicalHistory) {
   if (history.hasSensitive) tags.push('sensitive');
   return tags;
 };
+
+

@@ -8,6 +8,8 @@ import Loading from "./Loading";
 import { useEffect, useRef } from "react";
 
 
+import {toPng} from "html-to-image"
+import jsPDF from "jspdf"
 
 
 interface RightBarProps {
@@ -22,6 +24,7 @@ export function RightBar({isOpen, onCloas, id}: RightBarProps) {
         const {data: invoiceData, isFetching: isFetchingInvoice} = useGetInvoicePatientAPIQuery({id: id});
   
         const containerRef = useRef<HTMLDivElement>(null);
+        const inviceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
          function handleClickOutside(e:MouseEvent){
@@ -33,6 +36,28 @@ export function RightBar({isOpen, onCloas, id}: RightBarProps) {
 
          return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+   async function handleGeneratePDF(action: string, patient = "ali") {
+    const element = inviceRef.current;
+    if(!element)return;
+
+    const dataUrl = await toPng(element, { quality: 1, pixelRatio: 2});
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    const img = new Image();
+    img.src = dataUrl;
+    await img.decode();
+    const pdfHeight = (img.height * pdfWidth) / img.width;
+  pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+  if(action === "download"){
+    pdf.save(`Invoice-${patient}.pdf`)
+  }else {
+    pdf.autoPrint();
+    window.open(pdf.output("bloburl"), "_blank")
+}}
          
         const transaction = data?.data || [];
         const invoice = invoiceData?.data ;
@@ -41,7 +66,7 @@ export function RightBar({isOpen, onCloas, id}: RightBarProps) {
     return (
         <>
          <div  className={`z-50 fixed top-0 left-0 ${isOpen ? "w-full h-screen bg-gray-800/70" : ""} `}>
-            <div ref={containerRef}
+            <div ref={containerRef} 
             className={`fixed right-0 top-0  h-screen ${isOpen ? "w-[38%]" : "w-[0%]"} bg-white  shadow-sm shadow-gray-900 rounded-bl-md
             overflow-hidden transition-all duration-300 rounded-tl-md z-40 `}>
                 {isFetchingInvoice || isFetching || !invoice ? 
@@ -49,15 +74,15 @@ export function RightBar({isOpen, onCloas, id}: RightBarProps) {
                     <Loading />
                 </div>
                    :
-                <div className="p-6 overflow-y-scroll">
-
+                <div className=" overflow-y-scroll h-190 pb-3">
                     <button onClick={() => onCloas()}
-                    className=" absolute top-4 right-6 border-2 border-gray-900/40 p-1 rounded-xl flex items-center justify-center
-                    cursor-pointer transition-all duration-100 active:scale-90
+                    className=" absolute top-4 right-6 px-2 py-0.5 rounded-full flex items-center justify-center transform hover:rotate-90
+                    cursor-pointer transition-all duration-400 active:scale-90
                     ">
                         <FontAwesomeIcon className="text-xl  text-gray-800" icon={faXmark} />
                     </button>
-
+                   
+                  <div ref={inviceRef} className="p-6 ">
                     <div className="flex items-center justify-between mt-8">
                         <div>
                             <h1 className=" font-semibold text-gray-800 text-lg">{invoice?.patientId.patientCode}</h1>
@@ -137,21 +162,24 @@ export function RightBar({isOpen, onCloas, id}: RightBarProps) {
                         </div>
                     </div>
 
+                </div>
                     <div className=" relative -bottom-8 left-10 w-[50%] flex items-center space-x-3 mb-8">
-                        <button className="shadow shadow-gray-800 rounded-md py-1.5 px-3 cursor-pointer transition-all duration-100 active:scale-90
+                        <button onClick={() => handleGeneratePDF("print")}
+                         className="shadow shadow-gray-800 rounded-md py-1.5 px-3 cursor-pointer transition-all duration-100 active:scale-90
                         hover:bg-gray-500/20 
                         ">
                             <FontAwesomeIcon icon={faPrint} />
                             Print
                         </button>
-                        <button className="shadow shadow-gray-800 rounded-md py-1.5 px-3 cursor-pointer transition-all duration-100 active:scale-90
+                        <button onClick={() => handleGeneratePDF("download")}
+                         className="shadow shadow-gray-800 rounded-md py-1.5 px-3 cursor-pointer transition-all duration-100 active:scale-90
                         hover:bg-gray-500/20 
                         ">
                             <FontAwesomeIcon icon={faDownload} />
                             Dwonload PDF
                         </button>
                     </div>
-                </div>
+                   </div>
         }
             </div>
          </div>

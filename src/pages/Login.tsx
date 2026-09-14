@@ -37,8 +37,7 @@ export default function Login() {
             }
 
         }catch(error) {
-            console.error(error);
-            return setErrorMessage(errorCatch(error) || MESSAGES.ERROR_SERVER);
+            return setErrorMessage(errorCatch(error));
         }finally{
             setIsSubmitting(false);
         }
