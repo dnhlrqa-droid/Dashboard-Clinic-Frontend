@@ -11,6 +11,7 @@ export const authApi = createApi({
         return fetch(input, { ...init, signal: AbortSignal.timeout(15000) });
     }
    }),
+   refetchOnReconnect: true,
    tagTypes: ['Auth', "Employee"],
   endpoints: (build) => ({
     getCurrentUser: build.query<EmpluyeeDataVerifySession, void>({

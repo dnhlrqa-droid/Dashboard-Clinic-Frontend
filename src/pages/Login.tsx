@@ -1,8 +1,8 @@
-import { faCircleExclamation, faSpinner, faStethoscope } from "@fortawesome/free-solid-svg-icons";
+import { faSpinner, faStethoscope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { useLoginMutation } from "../store/authStore";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { MESSAGES } from "../utils/constants";
 import { errorCatch } from "../utils/errorHelpers";
 
@@ -16,7 +16,6 @@ import { errorCatch } from "../utils/errorHelpers";
 export default function Login() {
     const [password, setPassword] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     
 
     const [Login] = useLoginMutation()
@@ -24,10 +23,9 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setErrorMessage(null);
          
         try {
-              if(!password.trim()) return setErrorMessage("Please enter code");
+              if(!password.trim()) return toast.error("Please enter code");
 
             const response= await Login({password}).unwrap();
 
@@ -37,7 +35,7 @@ export default function Login() {
             }
 
         }catch(error) {
-            return setErrorMessage(errorCatch(error));
+           return toast.error(errorCatch(error));
         }finally{
             setIsSubmitting(false);
         }
@@ -45,6 +43,34 @@ export default function Login() {
 
     return (
         <>
+        <Toaster
+                    position="top-right"
+                    reverseOrder={false}
+                    gutter={8}
+                    toastOptions={{
+                        
+                      duration: 4000,
+                      style: {
+                        background: '#fff',
+                        color: '#000',
+                      },
+                      success: {
+                        duration: 3000,
+                        style: {
+                          background: '#10b981',
+                          color: '#fff',
+                        },
+                      },
+                      error: {
+                        duration: 4000,
+                        style: {
+                          background: '#ef4444',
+                          color: '#fff',
+                        },
+                      },
+                    }}
+                 />
+        
             <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-500 to-indigo-100 px-4">
             <div className="w-full max-w-md bg-gray-800/60 p-3 rounded-md">
                 <div className="p-3">
@@ -53,13 +79,6 @@ export default function Login() {
                     <FontAwesomeIcon icon={faStethoscope} className="text-3xl" />
                     </div>
                     <h1 className="text-3xl font-bold text-gray-100">Dental Clinic</h1>
-                    { <div className={`flex items-center justify-center transform transition-all duration-100
-                        ${errorMessage ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-5 scale-0"}`}>
-                         <p className="text-white bg-red-500/40 py-2 w-[80%] rounded-sm p-1">
-                             <FontAwesomeIcon className="text-xl" icon={faCircleExclamation} />
-                           {errorMessage}
-                        </p>
-                    </div>}
                 </div>
 
 

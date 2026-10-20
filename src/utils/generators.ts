@@ -114,3 +114,14 @@ export function getConditionTags(history: medicalHistory) {
 };
 
 
+export function isNetworkError(error: unknown) {
+    return (
+        typeof error === "object" && error !== null && "status" in error && (error as {status: unknown}).status === "FETCH_ERROR" || "TIMEOUT_ERROR"
+    )
+};
+
+export function isUnauthorized(error: unknown) {
+    return (
+        typeof error === "object" && error !== null && "status" in error && (error as {status: unknown}).status === 401
+    )
+};

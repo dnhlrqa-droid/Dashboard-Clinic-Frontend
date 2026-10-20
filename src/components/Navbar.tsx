@@ -4,9 +4,11 @@ import { faUser} from "@fortawesome/free-solid-svg-icons"
 import { useGetCurrentUserQuery } from '../store/authStore';
 import { getInitials } from '../utils/generators';
 
+export interface dataPropNavbar {
+    isOpen: boolean,
+};
 
-
-export default function Navbar() {
+export default function Navbar({isOpen}: dataPropNavbar) {
     const {data, status,  error} = useGetCurrentUserQuery();
 
      if(!data) return;
@@ -14,8 +16,8 @@ export default function Navbar() {
    return (
     <>
        <header className="flex items-center justify-end ">
-           <nav className="flex items-center justify-start px-3 py-3 border-b-2 border-gray-200
-               w-[84%] fixed top-0 right-0 bg-[#ffffff] z-30">
+           <nav className={`flex items-center justify-start px-3 py-3 border-b-2 border-gray-200
+               ${isOpen ? "w-[85%]" : "w-full"} fixed top-0 right-0 bg-[#ffffff] z-30 transition-all duration-300`}>
                <ul className="flex items-center justify-center space-x-3 w-[20%]">
                 <li className=" text-gray-700 font-bold flex  items-center justify-center shadow shadow-gray-700/70 rounded-md p-2 relative">
                     <span className=' absolute top-0.5 left-0.5 w-2 h-2 rounded-full bg-green-500 animate-pulse '></span>

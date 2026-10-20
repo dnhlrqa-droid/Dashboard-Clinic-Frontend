@@ -1,18 +1,21 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useGetCurrentUserQuery } from '../store/authStore';
 import { ROUTES_ROLES } from '../utils/constants';
+import Loading from './Loading';
 
 
 
 export default function PublicRoute() {
-    const { data: user } = useGetCurrentUserQuery();
+    const { data: user, status,} = useGetCurrentUserQuery();
 
-
-
-
+    if (status === "pending") {
+        return <Loading />;
+    }
+    
     if(user) {
         return <Navigate to={ROUTES_ROLES[user?.user.role]} replace />
     }
+    
 
-    return <> <Outlet /> </>
+    return <><Outlet /></>
 };

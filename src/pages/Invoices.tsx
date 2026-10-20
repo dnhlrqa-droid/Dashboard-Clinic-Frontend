@@ -222,14 +222,7 @@ export function InvoicesPage() {
                     color={COLORS.DARK}
                    />
                </div>
-
-                    <div className="flex items-center justify-center mb-3">
-                        <div className="flex items-center justify-end w-[95%]">
-                            <div className="w-80">
-                            <SearchInput onChange={setSearchTerm} />
-                            </div>
-                        </div>
-                    </div>             
+            
                          {isError ? 
                                   <div>
                                      <div  className="px-4 py-10 text-center text-gray-700">
@@ -253,6 +246,14 @@ export function InvoicesPage() {
                                           </div>
                                         </div>
                                       :
+                                      <>
+                                      <div className="flex items-center justify-center mb-3">
+                                          <div className="flex items-center justify-end w-[95%]">
+                                              <div className="w-80">
+                                              <SearchInput onChange={setSearchTerm} />
+                                              </div>
+                                          </div>
+                                      </div> 
                 <div className="flex items-center justify-center">
                     <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm max-h-150 overflow-y-scroll ">
                             <div className="flex items-center justify-between p-4">
@@ -324,6 +325,7 @@ export function InvoicesPage() {
                                    />
                     </div>
                 </div>
+                </>
                             }
                         </>
                         }
