@@ -1,13 +1,13 @@
 
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 
 import Patients from './pages/Patients'
-import Doctors  from './pages/Doctors'
-import Dashboard from './pages/Employees'
+import Doctors  from './pages/Employees'
+import Dashboard from './pages/Dashboard'
 import Appointments from './pages/Appointments'
 import Login from './pages/Login'
-import ProtectedRoute from './components/ProductRouters'
+
 import PublicRoute from './components/PublicRoute'
 import Layout from './pages/layout'
 import { ROUTES, ROUTES_ROLES_PATH } from './utils/constants'
@@ -16,7 +16,7 @@ import { MedicalRecords } from './pages/medical'
 import LayOutReceptionist from './pages/LayoutReceptionist'
 import LayOutDoctor from './pages/LayoutDoctor'
 import NetworkError from './components/NetworkError'
-import { RootRedirect } from './components/RootRedirect'
+import { UseAuthState } from './components/useAuthState'
 
 
 
@@ -25,8 +25,8 @@ function App() {
   return (
     <>
           <Routes>
-                   <Route path='/' element={<RootRedirect />}/>
                   <Route element={<PublicRoute />}>
+                        <Route path='/' element={<Navigate to={ROUTES.LOGIN} replace/>}/>
                         <Route path={ROUTES.LOGIN} element={<Login />}/>
                   </Route>
 
@@ -34,9 +34,9 @@ function App() {
                   <Route
                     path={ROUTES_ROLES_PATH.ADMIN}
                     element={
-                      <ProtectedRoute requiredRole={['admin']}>
+                      <UseAuthState requiredRole={['admin']}>
                         <Layout />
-                      </ProtectedRoute>
+                      </UseAuthState>
                     }
                   >
                     <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
@@ -51,9 +51,9 @@ function App() {
                   <Route
                     path={ROUTES_ROLES_PATH.DOCTOR}
                     element={
-                      <ProtectedRoute requiredRole={['doctor']}>
+                      <UseAuthState requiredRole={['doctor']}>
                         <LayOutDoctor />
-                      </ProtectedRoute>
+                      </UseAuthState>
                     }
                   >
                     <Route path={ROUTES.MEDICAL_RECORDS} element={<MedicalRecords />} />
@@ -63,9 +63,9 @@ function App() {
                   <Route
                     path={ROUTES_ROLES_PATH.RECEPTIONIST}
                     element={
-                      <ProtectedRoute requiredRole={['receptionist']}>
+                      <UseAuthState requiredRole={['receptionist']}>
                         <LayOutReceptionist />
-                      </ProtectedRoute>
+                      </UseAuthState>
                     }
                   >
                     <Route path={ROUTES.APPOINTMENTS} element={<Appointments />} />

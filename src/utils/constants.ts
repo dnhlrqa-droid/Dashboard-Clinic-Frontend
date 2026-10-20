@@ -74,7 +74,7 @@ export const ROLE_LABEL: Record<Role, string> = {
 
 // ==================== routes ====================
 export const ROUTES = {
-  LOGIN: '/login',
+  LOGIN: 'login',
   DASHBOARD: 'dashboard',
   DOCTORS: 'doctors',
   PATIENTS: 'patients',

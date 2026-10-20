@@ -28,11 +28,6 @@ export interface IApiResponse<T> {
 
 
 // ======= //
-export type AlertProps = {
-    title: string,
-    confirm: () => void,
-    onClose: () => void,
-};
 
 export type medicalHistory = {
     hasBloodPressure: boolean,

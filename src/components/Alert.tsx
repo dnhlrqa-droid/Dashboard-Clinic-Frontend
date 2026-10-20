@@ -1,10 +1,13 @@
 import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { AlertProps } from "../types/Types";
 
 
 
-
+export type AlertProps = {
+    title: string,
+    confirm: () => void,
+    onClose: () => void,
+};
 
 
 export default function Alert({title, confirm, onClose}: AlertProps) {

@@ -413,35 +413,6 @@ export function MedicalRecords() {
                   />
               </div>
 
-              <div className=" flex items-center justify-between px-10 my-2">
-                <div className="flex items-center space-x-6">
-                  <div className=" flex items-center space-x-10 ">
-                      <button onClick={() => handleBackPage()}
-                        title="back" 
-                          className={` text-3xl  hover:text-gray-600 active:scale-90 transition-all
-                          duration-100 ${page > 1 ? " opacity-100 cursor-pointer text-gray-800" : " text-gray-800/40 cursor-not-allowed"}`}>
-                        <FontAwesomeIcon icon={faCircleChevronLeft} />
-                      </button>
-                      <button disabled={isLastPage} onClick={() => handleNextPage()}
-                        title="next" className={`text-3xl hover:text-gray-600 active:scale-90 transition-all
-                          duration-100 ${!isLastPage ? "opacity-100 cursor-pointer text-gray-800" : " cursor-not-allowed text-gray-800/40 "}`}>
-                        <FontAwesomeIcon icon={faCircleChevronRight} />
-                      </button>
-                  </div>
-                  <div className="">
-                      <button title="get today's appointments" onClick={() => handleDisplayTable()}
-                        className="bg-blue-700/70 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-800/50 transition duration-300 cursor-pointer
-                        active:scale-90 font-semibold
-                        ">
-                          Today
-                      </button>
-                  </div>
-                </div>
-
-                 <div className="w-[30%]">
-                  <SearchInput onChange={setSearchHandler} />
-                 </div>
-              </div>
 
               {isError ? 
                       <div>
@@ -464,6 +435,36 @@ export function MedicalRecords() {
                                       <PageSkeletonLoader />
                                   </div>
                                              :
+                                             <>
+                              <div className=" flex items-center justify-between px-10 my-2">
+                                <div className="flex items-center space-x-6">
+                                  <div className=" flex items-center space-x-10 ">
+                                      <button onClick={() => handleBackPage()}
+                                        title="back" 
+                                          className={` text-3xl  hover:text-gray-600 active:scale-90 transition-all
+                                          duration-100 ${page > 1 ? " opacity-100 cursor-pointer text-gray-800" : " text-gray-800/40 cursor-not-allowed"}`}>
+                                        <FontAwesomeIcon icon={faCircleChevronLeft} />
+                                      </button>
+                                      <button disabled={isLastPage} onClick={() => handleNextPage()}
+                                        title="next" className={`text-3xl hover:text-gray-600 active:scale-90 transition-all
+                                          duration-100 ${!isLastPage ? "opacity-100 cursor-pointer text-gray-800" : " cursor-not-allowed text-gray-800/40 "}`}>
+                                        <FontAwesomeIcon icon={faCircleChevronRight} />
+                                      </button>
+                                  </div>
+                                  <div className="">
+                                      <button title="get today's appointments" onClick={() => handleDisplayTable()}
+                                        className="bg-blue-700/70 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-800/50 transition duration-300 cursor-pointer
+                                        active:scale-90 font-semibold
+                                        ">
+                                          Today
+                                      </button>
+                                  </div>
+                                </div>
+
+                                <div className="w-[30%]">
+                                  <SearchInput onChange={setSearchHandler} />
+                                </div>
+                              </div>
                                     <div className="flex items-center justify-center">
                                         <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm 
                                           max-h-150 overflow-y-scroll">
@@ -493,6 +494,7 @@ export function MedicalRecords() {
                                           }
                                         </div>
                                     </div>
+                                    </>
                                     }
                                 </>
                               }

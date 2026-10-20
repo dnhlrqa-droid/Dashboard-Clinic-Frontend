@@ -394,44 +394,7 @@ export default function Patients() {
                      color={COLORS.DARK}
                   />
                 </div>
-                   <div className="flex items-center justify-center">
-                      <div className="flex items-center justify-between w-[95%] mb-4 ">
-                          <div className=" flex items-center justify-between space-x-4 w-[30%]">
-                                  <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-                                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
-                                              <FontAwesomeIcon className="text-lg " icon={faUserGroup} />
-                                            </div>
-                                            <div>
-                                              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">All Patients</p>
-                                              <p className="text-2xl font-semibold text-slate-900">
-                                                {data?.data.patients.length}
-                                                <span className="ml-2 align-middle text-xs font-normal text-emerald-600">
-                                                  <FontAwesomeIcon className="text-[6px] align-middle mr-1" icon={faCircle} />
-                                                  {data?.data.patients.length} active
-                                                </span>
-                                              </p>
-                                            </div>
-                                  </div>
-                                  <div className=" flex items-center space-x-10">
-                                      <button disabled={page === 1} onClick={() => handleBackPage()}
-                                        title="back" 
-                                         className={`text-gray-800 text-3xl  hover:text-gray-600 active:scale-90 transition-all
-                                          duration-100 ${page > 1 ? " opacity-100 cursor-pointer" : " opacity-50 cursor-not-allowed"}`}>
-                                        <FontAwesomeIcon icon={faCircleChevronLeft} />
-                                      </button>
-                                      <button disabled={isLastPage} onClick={() => handleNextPage()}
-                                        title="next" className={`text-gray-800 text-3xl hover:text-gray-600 active:scale-90 transition-all
-                                         duration-100 ${!isLastPage ?
-                                           "opacity-100 cursor-pointer" : "opacity-50 cursor-not-allowed"}`}>
-                                        <FontAwesomeIcon icon={faCircleChevronRight} />
-                                      </button>
-                                  </div>
-                            </div>
-                            <div className="w-[30%]">
-                              <SearchInput onChange={setSearchTerm}/>
-                            </div>
-                      </div>
-                   </div>
+
                    {isError ? 
                                   <div>
                                      <div  className="px-4 py-10 text-center text-gray-700">
@@ -455,6 +418,45 @@ export default function Patients() {
                                           </div>
                                         </div>
                                       :
+                                      <>
+                                  <div className="flex items-center justify-center">
+                                    <div className="flex items-center justify-between w-[95%] mb-4 ">
+                                        <div className=" flex items-center justify-between space-x-4 w-[30%]">
+                                                <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                                                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+                                                            <FontAwesomeIcon className="text-lg " icon={faUserGroup} />
+                                                          </div>
+                                                          <div>
+                                                            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">All Patients</p>
+                                                            <p className="text-2xl font-semibold text-slate-900">
+                                                              {data?.data.patients.length}
+                                                              <span className="ml-2 align-middle text-xs font-normal text-emerald-600">
+                                                                <FontAwesomeIcon className="text-[6px] align-middle mr-1" icon={faCircle} />
+                                                                {data?.data.patients.length} active
+                                                              </span>
+                                                            </p>
+                                                          </div>
+                                                </div>
+                                                <div className=" flex items-center space-x-10">
+                                                    <button disabled={page === 1} onClick={() => handleBackPage()}
+                                                      title="back" 
+                                                      className={`text-gray-800 text-3xl  hover:text-gray-600 active:scale-90 transition-all
+                                                        duration-100 ${page > 1 ? " opacity-100 cursor-pointer" : " opacity-50 cursor-not-allowed"}`}>
+                                                      <FontAwesomeIcon icon={faCircleChevronLeft} />
+                                                    </button>
+                                                    <button disabled={isLastPage} onClick={() => handleNextPage()}
+                                                      title="next" className={`text-gray-800 text-3xl hover:text-gray-600 active:scale-90 transition-all
+                                                      duration-100 ${!isLastPage ?
+                                                        "opacity-100 cursor-pointer" : "opacity-50 cursor-not-allowed"}`}>
+                                                      <FontAwesomeIcon icon={faCircleChevronRight} />
+                                                    </button>
+                                                </div>
+                                          </div>
+                                          <div className="w-[30%]">
+                                            <SearchInput onChange={setSearchTerm}/>
+                                          </div>
+                                    </div>
+                                </div>
                          <div className="flex items-center justify-center">
                               <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm max-h-150 overflow-y-scroll">
                                       <DataTable<DataPatient> 
@@ -484,6 +486,7 @@ export default function Patients() {
                                 
                             </div>
                         </div>
+                                </>
                                   }
                                 </>
               }

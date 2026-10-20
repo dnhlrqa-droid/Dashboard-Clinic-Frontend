@@ -1,8 +1,13 @@
-import { faCalendar, faChartLine, faCodeFork, faCreditCard, faStethoscope, faUserDoctor, faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faCalendar, faChartLine, faCodeFork, faCreditCard, faStethoscope, faUserDoctor, faUserGroup, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useLocation } from 'react-router-dom';
 import { ROLES, ROUTES, ROUTES_ROLES_PATH_LINKS } from '../utils/constants';
 import { useGetCurrentUserQuery } from '../store/authStore';
+
+type SidebarProps = {
+    isOpen: boolean;
+    onToggle: () => void;
+};
 
 const minuOun = [
     {id: 1, lable: "Dashboard", role: ['admin'], icon: faChartLine, link: ROUTES.DASHBOARD},
@@ -17,18 +22,30 @@ const minutwo = [
 
 
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
    const {data: data} = useGetCurrentUserQuery();
   const location = useLocation().pathname;
-  
-  
+
+
   if(!data) return;
 
    return (
     <>
-        <main className=' relative top-0  z-40  w-[18.5%] '>
-          <div className='fixed top-0 bg-gray-100 w-80 h-screen '>
-               <div className='border-b-2 border-gray-300 flex items-center justify-center space-x-4  p-1.5 '>
+    <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Show sidebar"
+            aria-expanded={false}
+            title='Open Sidbar'
+            className="fixed left-5 top-3 z-40 rounded-md bg-blue-700 px-2 py-1.5 text-white shadow hover:bg-blue-800 cursor-pointer
+             transition-all duration-300 active:scale-85
+            "
+        >
+            <FontAwesomeIcon icon={faBars} />
+        </button>
+        <aside className={`fixed left-0 top-0 z-50 ${isOpen ? "w-[18%]" : "w-[0%]"} transition-all duration-300 overflow-hidden`}>
+          <div className='  bg-gray-100 h-screen w-full overflow-hidden'>
+               <div className='relative border-b-2 border-gray-300 flex items-center justify-center space-x-4 p-1.5'>
                  <div className='bg-blue-800/10 p-3 rounded-lg'>
                     <FontAwesomeIcon className='text-4xl text-blue-600/80' icon={faStethoscope} />
                  </div>
@@ -36,6 +53,18 @@ export default function Sidebar() {
                      <p className='text-gray-900 text-lg font-black'>Medi<span className='text-blue-700/80 text-2xl'>Care</span></p>
                      <p>Clinic Suite</p>
                  </div>
+                 <button
+                    type="button"
+                    onClick={onToggle}
+                    title='Cloas Sidbar'
+                    aria-label="Hide sidebar"
+                    aria-expanded={true}
+                    className="absolute right-2 top-4 rounded-md py-.5 px-1 text-gray-800 hover:bg-gray-200 cursor-pointer
+                     text-lg transition-all duration-300 active:scale-85
+                    "
+                 >
+                    <FontAwesomeIcon icon={faXmark} />
+                 </button>
              </div>
              <div className='mt-5 p-3'>
                 <ul className=''> 
@@ -74,11 +103,11 @@ export default function Sidebar() {
                 )}
              </div>
              <div className=' absolute bottom-4 w-full flex flex-col items-center justify-center border-t-2 border-gray-300'>
-                <p className='text-lg font-semibold text-gray-700'>{import.meta.env.VITE_APP_NAME}</p>
-                <p className='text-md font-bold text-blue-700/80'><FontAwesomeIcon icon={faCodeFork} /> v.{import.meta.env.VITE_APP_VERSION}</p>
+                <p className='text-lg font-semibold text-gray-700'>Clinic Dashboard</p>
+                <p className='text-md font-bold text-blue-700/80'><FontAwesomeIcon icon={faCodeFork} /> v.1.0.0</p>
              </div>
           </div>
-        </main>
+        </aside>
     </>
    )
 };
