@@ -367,27 +367,6 @@ export default function Doctors() {
               color={COLORS.DARK}
             />
         </div>
-        <div
-          className="my-6 flex flex-col gap-4 opacity-0 animate-[fadeInUp_0.4s_ease-out_forwards] sm:flex-row sm:items-center sm:justify-between"
-          style={{ animationDelay: "60ms" }}
-        >
-
-          <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
-              <FontAwesomeIcon className="text-lg " icon={faUsers} />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">All employees</p>
-              <p className="text-2xl font-semibold text-slate-900">
-                {employeesIsActive.length}
-                <span className="ml-2 align-middle text-xs font-normal text-emerald-600">
-                  <FontAwesomeIcon className="text-[6px] align-middle mr-1" icon={faCircle} />
-                  {employeesIsActive.length} active
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
 
               {isError ? 
                            <div>
@@ -411,10 +390,34 @@ export default function Doctors() {
                                    </div>
                                :
                         <>
-                        <div className="relative w-full sm:w-80">
-                          <SearchInput 
-                            onChange={setSearchValue}
-                          />
+
+                        <div className="flex items-center justify-between">
+                          <div
+                              className="my-6 flex flex-col gap-4 opacity-0 animate-[fadeInUp_0.4s_ease-out_forwards] sm:flex-row sm:items-center sm:justify-between"
+                              style={{ animationDelay: "60ms" }}
+                            >
+
+                              <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+                                  <FontAwesomeIcon className="text-lg " icon={faUsers} />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">All employees</p>
+                                  <p className="text-2xl font-semibold text-slate-900">
+                                    {employeesIsActive.length}
+                                    <span className="ml-2 align-middle text-xs font-normal text-emerald-600">
+                                      <FontAwesomeIcon className="text-[6px] align-middle mr-1" icon={faCircle} />
+                                      {employeesIsActive.length} active
+                                    </span>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          <div className="relative w-full sm:w-80">
+                            <SearchInput 
+                              onChange={setSearchValue}
+                            />
+                          </div>
                         </div>
                     <div className="flex items-center justify-center">
                         <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm max-h-150 overflow-y-scroll">

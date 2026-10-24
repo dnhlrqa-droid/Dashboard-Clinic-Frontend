@@ -12,7 +12,7 @@ import { errorCatch } from "../utils/errorHelpers";
 import { COLORS, MESSAGES, ROLES } from "../utils/constants";
 import type { createPatientProps, DataPatient } from "../types/Types";
 import SearchInput from "../components/Search";
-import { useGetCurrentUserQuery, useGetEmployeeAPIQuery } from "../store/authStore";
+import { useGetEmployeeAPIQuery } from "../store/authStore";
 import { getConditionTags, getInitials } from "../utils/generators";
 import { format } from "date-fns";
 import { DataTable, type Column } from "../components/Table";
@@ -87,7 +87,7 @@ export default function Patients() {
     const [createPatientAPI, {isLoading: isLoadingCreate, isError: isErrorCreate}] = useCreatePatientAPIMutation();
     const [updatePatientAPI, {isLoading: isLoadingUpdate, isError: isErrorUpdate}] = useUpdatePatientAPIMutation();
     const [toggleStatusAPI, {isLoading: toggleIsLoading}] = useToggleStatusAPIMutation();
-    const {data: user} = useGetCurrentUserQuery();
+    // const {data: user} = useGetCurrentUserQuery();
     const {data: employeesData} = useGetEmployeeAPIQuery();
 
     const patients = data?.data.patients || [];
@@ -230,7 +230,7 @@ export default function Patients() {
    };
  //  ========================================================= //
 
-  if(!user)return;
+  // if(!user)return;
   const employees = employeesData?.data || [];
 
     return (

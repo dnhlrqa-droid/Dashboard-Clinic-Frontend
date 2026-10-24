@@ -1,4 +1,4 @@
-import {  faBookMedical, faCalendar, faSpinner } from "@fortawesome/free-solid-svg-icons"
+import {  faBookMedical, faCalendar, faCircleChevronLeft, faCircleChevronRight, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import Button from "../components/Button"
 import Crads from "../components/Crads"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -70,13 +70,28 @@ export default function Appointments() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [toggleButtonColor, setToggleButtonColor] = useState("");
     const [isAppointmentToday, setIsAppointmentToday] = useState(false);
+    const [page, setPage] = useState(1);
 
 
-
-    const {data, isLoading, isError, refetch, isFetching} = useGetAppointmentAPIQuery({status: toggleButtonColor});
+    const {data, isLoading, isError, refetch, isFetching} = useGetAppointmentAPIQuery({status: toggleButtonColor, page});
     const [createAppointment, {isLoading: createIsLoading, isError: createIsError}] = useCreateAppoinmentAPIMutation();
     const {data: dataEmployee} = useGetEmployeeAPIQuery();
     const {data: dataAppointmentToday} = useGetAppointmentTodayAPIQuery();
+
+    const patients = data?.data || [];
+    const isLastPage = page * 20 >= patients.length;
+
+    const handleNextPage = () => {
+      if(isLastPage){
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    const handleBackPage = () => {
+      if(page > 1){
+        setPage((prev) => prev - 1);
+      }
+    };
 
     const handleOpenModal = () => {
        setIsModalOpen(true);
@@ -124,6 +139,8 @@ export default function Appointments() {
   const displayAppointment = isAppointmentToday ? dataAppointmentToday?.data : data?.data || [];
   const filteredAppointment  = displayAppointment ?  displayAppointment : [];
 
+
+
     return (
         <>
            <div className=" fixed top-30 right-10 z-50">
@@ -138,8 +155,8 @@ export default function Appointments() {
             <Modal 
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                title="Register new employees"
-                text="Fill in the details to add a employees to the directory."
+                title="Register new Appointment"
+                text="Fill in the details to add a new appointment to the schedule."
                 footer={
                          <div className="flex items-center justify-end space-x-4 ">
                                       <button type="button" onClick={handleCloseModal}
@@ -278,6 +295,28 @@ export default function Appointments() {
                                        <PageSkeletonLoader />
                                    </div>
                                :
+
+                               <>
+                               <div className="flex items-center justify-center">
+                                    <div className="flex items-center justify-between w-[95%] mb-4 ">
+                                        <div className=" flex items-center justify-between space-x-4 w-[30%]">
+                                                <div className=" flex items-center space-x-10">
+                                                    <button disabled={page === 1} onClick={() => handleBackPage()}
+                                                      title="back" 
+                                                      className={`text-gray-800 text-3xl  hover:text-gray-600 active:scale-90 transition-all
+                                                        duration-100 ${page > 1 ? " opacity-100 cursor-pointer" : " opacity-50 cursor-not-allowed"}`}>
+                                                      <FontAwesomeIcon icon={faCircleChevronLeft} />
+                                                    </button>
+                                                    <button disabled={isLastPage} onClick={() => handleNextPage()}
+                                                      title="next" className={`text-gray-800 text-3xl hover:text-gray-600 active:scale-90 transition-all
+                                                      duration-100 ${!isLastPage ?
+                                                        "opacity-100 cursor-pointer" : "opacity-50 cursor-not-allowed"}`}>
+                                                      <FontAwesomeIcon icon={faCircleChevronRight} />
+                                                    </button>
+                                                </div>
+                                          </div>
+                                    </div>
+                                </div>
                       <div className="flex items-center justify-center">
                           <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow shadow-gray-700
                              max-h-150  overflow-y-scroll">
@@ -329,6 +368,7 @@ export default function Appointments() {
                             />
                           </div>
                       </div>
+                      </>
                       }
                   </>
                 }
