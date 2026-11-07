@@ -110,11 +110,15 @@ export interface EmployeeData {
     _id?: string,
     name: string,
     email: string,
-    password: string,
+    password?: string,
     role:  string,
     phone: string,
 };
 
+export interface ChangePasswordProps {
+  id?: string;
+  newPassword: string;
+}
 // ================== Appointment ================= //
 
 

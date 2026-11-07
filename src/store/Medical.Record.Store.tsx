@@ -34,4 +34,4 @@ export const MedicalRecordStore = createApi({
 });
 
 
-export const { useGetMedicalRecordAPIQuery, useCreateMedicalRecordMutation } = MedicalRecordStore;
+export const { useLazyGetMedicalRecordAPIQuery, useCreateMedicalRecordMutation } = MedicalRecordStore;

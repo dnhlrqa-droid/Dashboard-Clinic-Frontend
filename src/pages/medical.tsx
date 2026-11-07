@@ -1,7 +1,8 @@
 import { faCircleChevronLeft, faCircleChevronRight, faNotesMedical, faSpinner, faStethoscope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Crads from "../components/Crads";
-import { useCreateMedicalRecordMutation, useGetMedicalRecordAPIQuery } from "../store/Medical.Record.Store";
+import { useCreateMedicalRecordMutation, useLazyGetMedicalRecordAPIQuery } from "../store/Medical.Record.Store";
+import { useGetCurrentUserQuery } from "../store/authStore";
 import { format } from "date-fns";
 import { useState } from "react";
 import { PageSkeletonLoader } from "../components/Loading";
@@ -54,15 +55,7 @@ const columns: Column<MedicalRecord>[] = [
     ))}
     </>
   )},
-  {key: "toothNumber", header: 'toothNumber', render: (record) => (
-    <>
-    {record.teethTreated.map((tooth, index) => (
-        <div key={index} className="px-3 py-2 text-md font-semibold ml-10">
-            <span className=" bg-blue-500/30 p-1.5 rounded-xl">{tooth.toothNumber}</span>
-        </div>
-    ))}
-    </>
-  )},
+
   {key: "newToothCondition", header: 'ToothCondition', render: (record) => (
     <>
     {record.teethTreated.map((tooth, index) => (
@@ -114,13 +107,16 @@ const columnsToday: Column<AppointmentProps>[] = [
 
 export function MedicalRecords() {
     const [page, setPage] = useState(1);
-    const [isOpenTableToday, setIsOpenTableToday] = useState(false);
     const [searchHandler, setSearchHandler] = useState('');
-
-    const {data, refetch, isFetching,isLoading, isError} = useGetMedicalRecordAPIQuery({page: page, search: searchHandler});
-    const {data: dataToday, refetch: refetchAppointmentToday} = useGetAppointmentTodayAPIQuery();
+    const [isSwitch, setIsSwitch] = useState(false);
+    const [targget, {data, isLoading: isLoadingGetMedicalRecords}] = useLazyGetMedicalRecordAPIQuery();
+    const {data: dataToday, refetch: refetchAppointmentToday, isError: isErrorAppointmentToday, isLoading: isLoadingAppointmentToday
+      
+    } = useGetAppointmentTodayAPIQuery();
     const [createMedicalRecords, {isLoading:isLoadingCreate}] = useCreateMedicalRecordMutation();
-    
+    const {data: user} = useGetCurrentUserQuery();
+
+
      const medicalRecords = data?.data || [];
      const appointmentsToday = dataToday?.data || [];
      const isLastPage = page * 20 >= medicalRecords.length;
@@ -150,10 +146,6 @@ export function MedicalRecords() {
       if(page > 1) {
         setPage(priv => priv - 1); 
       }
-    };
-
-    const handleDisplayTable = () => {
-         setIsOpenTableToday((prev) => !prev);
     };
 
     // ================================= //
@@ -198,7 +190,7 @@ export function MedicalRecords() {
       };
     
     
-      const  handleCreateMedicalRecords = async () => {
+      const handleCreateMedicalRecords = async () => {
     
         if(medicalRecord.treatmentStatus.trim() === "" || medicalRecord.nextSessionTimeframe.trim() === "")return toast.error(MESSAGES.ERROR_ENTER_INPUTS);
      
@@ -234,6 +226,14 @@ export function MedicalRecords() {
 
     // ================================= //
 
+    const handleGetMedicalRecords = async () => {
+      setIsSwitch(true);
+        try {
+           await targget({page: page, search: searchHandler}).unwrap();
+        }catch(error) {
+          return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
+        }
+    };
 
      
     return (
@@ -286,10 +286,22 @@ export function MedicalRecords() {
                                                  ToothNumber
                                                 <input
                                                   name="toothNumber"
-                                                  type="number"
+                                                  type="text"
+                                                  min={1}
+                                                  max={32}
                                                   placeholder="toothNumber"
                                                   value={tooth.toothNumber}
-                                                  onChange={(e) => handleToothFieldChange(index, "toothNumber", Number(e.target.value))}
+                                                  onChange={(e) => {
+                                                      const val = e.target.value;
+                                                      if (val === "") {
+                                                        handleToothFieldChange(index, "toothNumber", "");
+                                                        return;
+                                                      }
+                                                      const num = Number(val);
+                                                      if (!isNaN(num) && num >= 1 && num <= 32) {
+                                                        handleToothFieldChange(index, "toothNumber", num);
+                                                      }
+                                                    }}
                                                   className="shadow-gray-800 shadow-sm rounded-sm p-1 w-full "
                                                 />
                                               </label>
@@ -414,12 +426,12 @@ export function MedicalRecords() {
               </div>
 
 
-              {isError ? 
+              {isErrorAppointmentToday ? 
                       <div>
                         <div  className="px-4 py-10 text-center text-gray-700">
                            <h1 className="text-2xl">Network Error</h1>
                          <p className="text-lg">Make sure you are connected for the network.</p>
-                             <button onClick={() => refetch()}
+                             <button onClick={() => refetchAppointmentToday()}
                               className="text-xl rounded-md cursor-pointer bg-blue-600 text-white hover:bg-blue-500
                                transition-all duration-300 active:scale-90 mt-5 w-25 py-1
                                  "
@@ -430,12 +442,13 @@ export function MedicalRecords() {
                        </div>
                                    :
                                     <>
-                          { isLoading || isFetching  ?
+                          { isLoadingAppointmentToday && isLoadingGetMedicalRecords ?
                                   <div >
                                       <PageSkeletonLoader />
                                   </div>
                                              :
                                              <>
+                              {user && user.user.role === "admin" && (
                               <div className=" flex items-center justify-between px-10 my-2">
                                 <div className="flex items-center space-x-6">
                                   <div className=" flex items-center space-x-10 ">
@@ -451,12 +464,18 @@ export function MedicalRecords() {
                                         <FontAwesomeIcon icon={faCircleChevronRight} />
                                       </button>
                                   </div>
-                                  <div className="">
-                                      <button title="get today's appointments" onClick={() => handleDisplayTable()}
-                                        className="bg-blue-700/70 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-800/50 transition duration-300 cursor-pointer
+                                  <div className="flex items-center space-x-4">
+                                      <button title="get today's appointments" onClick={() => handleGetMedicalRecords()}
+                                        className="bg-blue-700/70 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 cursor-pointer
                                         active:scale-90 font-semibold
                                         ">
-                                          Today
+                                           Medical Records
+                                      </button>
+                                      <button title="get medical records" onClick={() => setIsSwitch(false)}
+                                        className="bg-blue-700/70 text-gray-100 px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 cursor-pointer
+                                        active:scale-90 font-semibold
+                                        ">
+                                          Today Appointments
                                       </button>
                                   </div>
                                 </div>
@@ -465,33 +484,35 @@ export function MedicalRecords() {
                                   <SearchInput onChange={setSearchHandler} />
                                 </div>
                               </div>
+                              )}
+                              
                                     <div className="flex items-center justify-center">
                                         <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm 
                                           max-h-150 overflow-y-scroll">
-                                          {isOpenTableToday ?
-
-                                           <DataTable<AppointmentProps>
-                                            emptyMessage="there are no appointments to display."
-                                            data={appointmentsToday}
-                                            columns={columnsToday}
-                                            keyExtractor={(app) => app._id}
-                                            renderActions={(app) => (
-                                              <button onClick={() => handleOpenModal(app)}
-                                              className="rounded-sm bg-blue-500/20 cursor-pointer hover:bg-blue-500/40 text-blue-600 text-lg p-1
-                                               hover:scale-95 transition-all duration-150 active:scale-95
-                                              ">
-                                                <FontAwesomeIcon icon={faNotesMedical} />
-                                              </button>
-                                            )}
-                                          />
-                                          :
-                                          <DataTable<MedicalRecord>
-                                            emptyMessage="there are no medical records to display."
-                                            data={medicalRecords}
-                                            columns={columns}
-                                            keyExtractor={(record) => record._id}
-                                            />
-                                          }
+                                           {
+                                            !isSwitch ?
+                                            <DataTable<AppointmentProps>
+                                             emptyMessage="there are no appointments to display."
+                                             data={appointmentsToday}
+                                             columns={columnsToday}
+                                             keyExtractor={(app) => app._id}
+                                             renderActions={(app) => (
+                                               <button onClick={() => handleOpenModal(app)}
+                                               className="rounded-sm bg-blue-500/20 cursor-pointer hover:bg-blue-500/40 text-blue-600 text-lg p-1
+                                                hover:scale-95 transition-all duration-150 active:scale-95
+                                               ">
+                                                 <FontAwesomeIcon icon={faNotesMedical} />
+                                               </button>
+                                             )}
+                                           />
+                                           :
+                                           <DataTable<MedicalRecord>
+                                             emptyMessage="there are no medical records to display."
+                                             data={medicalRecords}
+                                             columns={columns}
+                                             keyExtractor={(record) => record._id}
+                                             /> 
+                                           }
                                         </div>
                                     </div>
                                     </>

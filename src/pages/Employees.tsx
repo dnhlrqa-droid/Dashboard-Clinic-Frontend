@@ -1,8 +1,8 @@
 
-import { faCircle, faCircleCheck, faCircleXmark, faEye, faEyeSlash, faLock, faLockOpen, faPen, faSpinner, faUserDoctor, faUsers } from "@fortawesome/free-solid-svg-icons";
+import { faCircle, faCircleCheck, faCircleXmark, faEye, faEyeSlash, faKey, faLock, faLockOpen, faPen, faSpinner, faUserDoctor, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SearchInput from "../components/Search";
-import { useGetEmployeeAPIQuery, useRegisterEmployeeAPIMutation, useToggleStatusEmployeeAPIMutation, useUpdateEmployeeAPIMutation } from "../store/authStore";
+import { useChangePasswordAPIMutation, useGetEmployeeAPIQuery, useRegisterEmployeeAPIMutation, useToggleStatusEmployeeAPIMutation, useUpdateEmployeeAPIMutation } from "../store/authStore";
 import { COLORS, MESSAGES, ROLE_LABEL, ROLE_STYLES, type Role } from "../utils/constants";
 import Crads from "../components/Crads";
 import Button from "../components/Button";
@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { errorCatch } from "../utils/errorHelpers";
 import { useState } from "react";
 import { getInitials } from "../utils/generators";
-import type { employee, EmployeeData } from "../types/Types";
+import type { ChangePasswordProps, employee, EmployeeData } from "../types/Types";
 import { DataTable, type Column } from "../components/Table";
 import { PageSkeletonLoader } from "../components/Loading";
 
@@ -74,11 +74,6 @@ const columns: Column<employee>[] = [
      </span>
     </>
   )},
-  {key: "password", header: "Password", render: (emp) => (
-    <>
-       <PasswordCell password={emp.password } />
-    </>
-  )},
   {key: "status", header: "Status", render: (emp) => (
     <>
     <span
@@ -95,10 +90,13 @@ const columns: Column<employee>[] = [
   )},
 ];
 
+
+
 export default function Doctors() {
   const [toggleButton, setToggleButton] = useState(true);
   const [revealedSearch, setRevealedSearch] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpenModalPassword, setIsOpenModalPassword] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [createEmployee, setCreateEmployee] = useState<EmployeeData>({
     name: "",
@@ -107,12 +105,17 @@ export default function Doctors() {
     role: "",
     phone: "",
   });
+  const [newPassword, setNewPassword] = useState<ChangePasswordProps>({
+    id: "",
+    newPassword: "",
+  });
 
 
-  const {data: user, isFetching, isLoading, isError, refetch} = useGetEmployeeAPIQuery({search: searchValue});
+  const {data: user, isLoading, isError, refetch} = useGetEmployeeAPIQuery({search: searchValue});
   const [registerEmployeeAPI, { isLoading: registerIsLoading}] = useRegisterEmployeeAPIMutation();
   const [updateEmployeeAPI] = useUpdateEmployeeAPIMutation();
   const [toggleStatusEmployeeAPI, {isLoading: toggleIsLoading }] = useToggleStatusEmployeeAPIMutation();
+  const [changePassword, {isLoading: isLoadingCheckPassword}] = useChangePasswordAPIMutation();
 
   const employees =  user?.data || [];
   const employeesIsActive = employees.filter((e) => e.isActive === true);
@@ -126,12 +129,24 @@ export default function Doctors() {
   const handleCloseModal = () => {
      setIsModalOpen(false);
      setToggleButton(true);
-     setCreateEmployee({
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-      phone: "",
+     setNewPassword({
+      id: "",
+      newPassword: "",
+    });
+  };
+  const handleOpenModalChangePassword = (id: string) => {
+     setIsOpenModalPassword(true);
+     setNewPassword({
+      id: id,
+      newPassword: newPassword.newPassword,
+    });
+  };
+
+  const handleCloseModalChangePassword = () => {
+     setIsOpenModalPassword(false);
+     setNewPassword({
+      id: "",
+      newPassword: "",
     });
   };
 
@@ -155,15 +170,6 @@ export default function Doctors() {
  
      }catch(error) {
         return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
-     }finally{
-      setIsModalOpen(false);
-      setCreateEmployee({
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-      phone: "",
-      });
      }
   };
 
@@ -178,14 +184,13 @@ export default function Doctors() {
       _id: dataEmployee?._id,
       name: dataEmployee?.name,
       email: dataEmployee?.email,
-      password: dataEmployee?.password,
       role: dataEmployee?.role,
       phone: dataEmployee?.phone,
     });
   };
 
   const handleUpdateEmployee = async (employeeId: string) => {
-     if(createEmployee.name === "" || createEmployee.email === "" || createEmployee.password === "" || createEmployee.role === "" || 
+     if(createEmployee.name === "" || createEmployee.email === "" || createEmployee.role === "" || 
       createEmployee.phone === ""
      ) return toast.error(MESSAGES.ERROR_ENTER_INPUTS);
      try {
@@ -196,7 +201,6 @@ export default function Doctors() {
           setCreateEmployee({
               name: "",
               email: "",
-              password: "",
               role: "",
               phone: "",
           });
@@ -204,15 +208,6 @@ export default function Doctors() {
  
      }catch(error) {
         return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
-     }finally{
-      setIsModalOpen(false);
-      setCreateEmployee({
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-      phone: "",
-      });
      }
   };
 
@@ -230,6 +225,25 @@ export default function Doctors() {
      }
   }
 
+  const handleChangePassword = async () => {
+    if(newPassword.newPassword === "") return toast.error(MESSAGES.ERROR_ENTER_INPUTS);
+     try {
+         const response = await changePassword(newPassword).unwrap();
+
+         if(response.status) {
+            toast.success(MESSAGES.SUCCESS_UPDATE_EMPLOYEE);  
+            setIsOpenModalPassword(false);
+            setNewPassword({
+              id: "",
+              newPassword: "",
+            });
+         }
+ 
+     }catch(error) {
+        return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
+     }
+  }
+
 
 
   return (
@@ -240,6 +254,55 @@ export default function Doctors() {
             onClick={handleOpenModal}
           />
       </div>
+      <Modal 
+                    isOpen={isOpenModalPassword}
+                    onClose={handleCloseModalChangePassword}
+                    title="Change Password"
+                    text="Fill in the details to change password."
+                    footer={
+                        <div className="flex items-center justify-end space-x-4 ">
+                            <button type="button" onClick={handleCloseModalChangePassword}
+                              className="text-md shadow-sm shadow-gray-600 text-gray-800  py-1.5 px-3 cursor-pointer hover:bg-gray-600 rounded-sm 
+                              hover:text-white
+                            ">
+                                Cancel
+                            </button>
+                                <button disabled={isLoadingCheckPassword} onClick={() => handleChangePassword()}
+                                  type="button" className={` ${isLoadingCheckPassword ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
+                                  text-sm text-white bg-gray-800 py-1.5 px-3  hover:bg-gray-600 rounded-sm`}>
+                                  {isLoadingCheckPassword ? 
+                                  <span><FontAwesomeIcon icon={faSpinner} spin /> updated...</span>
+                                  :
+                                      "New Password"
+                                  }
+                                </button>
+                        </div>
+                    }
+                  >
+                        <form>
+                                  {toggleButton && (
+                                      <label className="flex flex-col w-full mb-2" htmlFor="Password">
+                                          Password
+                                          <div className="flex items-center rounded-sm shadow-sm shadow-gray-600 
+                                              
+                                          ">
+                                            <input  value={newPassword?.newPassword} 
+                                              onChange={(e) => setNewPassword({ ...newPassword, newPassword: e.target.value })}
+                                              className="p-2  w-full outline-none"
+                                            type={!revealedSearch ? "password" : "text" } id="Password" placeholder="Password" required/>
+                                            <button
+                                                  type="button"
+                                                  onClick={() => setRevealedSearch((r) => !r)}
+                                                  className="text-slate-400 hover:text-slate-700 transition-colors duration-150 cursor-pointer mx-2"
+                                                  aria-label={!revealedSearch ? "Hide password" : "Show password"}
+                                                >
+                                                  <FontAwesomeIcon className="text-lg" icon={!revealedSearch ? faEyeSlash : faEye} />
+                                          </button>
+                                          </div>
+                                    </label>
+                                  )}
+                        </form>
+      </Modal>
       <Modal 
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
@@ -310,25 +373,27 @@ export default function Doctors() {
                                           <option value="receptionist">Receptionist</option>
                                         </select>
                                   </label>
-                                    <label className="flex flex-col w-full" htmlFor="Password">
-                                        Password
-                                        <div className="flex items-center rounded-sm shadow-sm shadow-gray-600 
-                                            
-                                        ">
-                                          <input  value={createEmployee?.password} 
-                                            onChange={(e) => setCreateEmployee({ ...createEmployee, password: e.target.value })}
-                                            className="p-2  w-full outline-none"
-                                          type={!revealedSearch ? "password" : "text" } id="Password" placeholder="Password" required/>
-                                          <button
-                                                type="button"
-                                                onClick={() => setRevealedSearch((r) => !r)}
-                                                className="text-slate-400 hover:text-slate-700 transition-colors duration-150 cursor-pointer mx-2"
-                                                aria-label={!revealedSearch ? "Hide password" : "Show password"}
-                                              >
-                                                <FontAwesomeIcon className="text-lg" icon={!revealedSearch ? faEyeSlash : faEye} />
-                                         </button>
-                                        </div>
-                                  </label>
+                                  {toggleButton && (
+                                      <label className="flex flex-col w-full" htmlFor="Password">
+                                          Password
+                                          <div className="flex items-center rounded-sm shadow-sm shadow-gray-600 
+                                              
+                                          ">
+                                            <input  value={createEmployee?.password} 
+                                              onChange={(e) => setCreateEmployee({ ...createEmployee, password: e.target.value })}
+                                              className="p-2  w-full outline-none"
+                                            type={!revealedSearch ? "password" : "text" } id="Password" placeholder="Password" required/>
+                                            <button
+                                                  type="button"
+                                                  onClick={() => setRevealedSearch((r) => !r)}
+                                                  className="text-slate-400 hover:text-slate-700 transition-colors duration-150 cursor-pointer mx-2"
+                                                  aria-label={!revealedSearch ? "Hide password" : "Show password"}
+                                                >
+                                                  <FontAwesomeIcon className="text-lg" icon={!revealedSearch ? faEyeSlash : faEye} />
+                                          </button>
+                                          </div>
+                                    </label>
+                                  )}
                               </div>
                               <div className="mb-4 ">
                                   <label className="flex flex-col w-full" htmlFor="phoneNumber">
@@ -384,7 +449,7 @@ export default function Doctors() {
                             </div>
                            :
                       <>
-                        { isLoading || isFetching  ?
+                        { isLoading   ?
                                    <div >
                                        <PageSkeletonLoader />
                                    </div>
@@ -448,6 +513,14 @@ export default function Doctors() {
                                         bg-gray-400 cursor-pointer active:scale-90"
                                     >
                                       <FontAwesomeIcon className="text-sm" icon={faPen} />
+                                    </button>
+                                    <button onClick={() => handleOpenModalChangePassword(emp._id)}
+                                      type="button"
+                                      title="Edit employee"
+                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-yellow-50 transition-all duration-150
+                                       hover:bg-yellow-700 bg-yellow-400/90 cursor-pointer active:scale-90"
+                                    >
+                                      <FontAwesomeIcon className="text-sm" icon={faKey} />
                                     </button>
                                   </div>
                               )}

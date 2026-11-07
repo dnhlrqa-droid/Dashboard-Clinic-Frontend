@@ -25,8 +25,8 @@ export function UseAuthState({requiredRole, children}: ProtectedRouteProps) {
 
    if(isError) {
        if(isNetworkError(error)) return <Navigate to={ROUTES.ERROR_NETWORK} replace />;
-       if(!user) return <Navigate to={ROUTES.ERROR_NETWORK} replace /> ;
        if(isUnauthorized(error)) return <Navigate to={ROUTES.LOGIN} replace />;
+       if(!user) return <Navigate to={ROUTES.ERROR_NETWORK} replace /> ;
    }
 
 
