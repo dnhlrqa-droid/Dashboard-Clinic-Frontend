@@ -1,15 +1,18 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useGetCurrentUserQuery } from "../store/authStore";
 import { faRotate, faSpinner, faWifi } from "@fortawesome/free-solid-svg-icons";
-import { ROUTES_ROLES } from "../utils/constants";
+import { ROUTES, ROUTES_ROLES } from "../utils/constants";
 import { Navigate } from "react-router-dom";
+import { isUnauthorized } from "../utils/generators";
 
 
 
 export default function NetworkError() {
 
-   const {data: user, isFetching, refetch, isError} = useGetCurrentUserQuery();
-
+   const {data: user, isFetching, refetch, isError, error} = useGetCurrentUserQuery();
+    if(isError) {
+          if(isUnauthorized(error)) return <Navigate to={ROUTES.LOGIN} replace />;
+      }
    if(user) {
        return <Navigate to={ROUTES_ROLES[user?.user.role]} replace />
     }

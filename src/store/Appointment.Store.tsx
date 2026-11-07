@@ -44,5 +44,5 @@ export const AppointmentAPI = createApi({
 });
 
 export const {useGetAppointmentAPIQuery, useCreateAppoinmentAPIMutation, useToggleAppointmentAPIMutation,
-    useGetAppointmentTodayAPIQuery
+    useGetAppointmentTodayAPIQuery, useLazyGetAppointmentAPIQuery
 } = AppointmentAPI;

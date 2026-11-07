@@ -50,13 +50,20 @@ export const authApi = createApi({
         url: `auth/toggle-status/${employeeId}`,
         method: "PATCH"
       }), invalidatesTags: ["Employee"]
+    }),
+    changePasswordAPI: build.mutation({
+      query: ({id, newPassword}) => ({
+        url: "auth/change-password",
+        method: "PATCH",
+        body: {id, newPassword}
+      })
     })
   }),
 })
 
 
 export const { useGetCurrentUserQuery, useLoginMutation, useGetEmployeeAPIQuery, useRegisterEmployeeAPIMutation,
-  useUpdateEmployeeAPIMutation, useToggleStatusEmployeeAPIMutation
+  useUpdateEmployeeAPIMutation, useToggleStatusEmployeeAPIMutation, useChangePasswordAPIMutation,
  } = authApi
 
 

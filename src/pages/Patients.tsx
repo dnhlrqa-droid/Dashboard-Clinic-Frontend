@@ -82,12 +82,12 @@ export default function Patients() {
 
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [page, setPage] = useState<number>(1);
-    const { data, refetch, isError, isFetching, isLoading} = useGetPatientsAPIQuery({search: searchTerm, page: page});
+    const { data, refetch, isError, isLoading} = useGetPatientsAPIQuery({search: searchTerm, page: page});
 
-    const [createPatientAPI, {isLoading: isLoadingCreate, isError: isErrorCreate}] = useCreatePatientAPIMutation();
-    const [updatePatientAPI, {isLoading: isLoadingUpdate, isError: isErrorUpdate}] = useUpdatePatientAPIMutation();
+    const [createPatientAPI, {isLoading: isLoadingCreate}] = useCreatePatientAPIMutation();
+    const [updatePatientAPI, {isLoading: isLoadingUpdate}] = useUpdatePatientAPIMutation();
     const [toggleStatusAPI, {isLoading: toggleIsLoading}] = useToggleStatusAPIMutation();
-    // const {data: user} = useGetCurrentUserQuery();
+
     const {data: employeesData} = useGetEmployeeAPIQuery();
 
     const patients = data?.data.patients || [];
@@ -153,13 +153,7 @@ export default function Patients() {
           if(response.status) {
             toast.success(MESSAGES.SUCCESS_CREATE_PATIENT);
             setIsModalOpen(false);
-          }
-           
-        }catch(error) {
-          return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
-        }finally{
-          setIsModalOpen(false);
-          setCreatePatient({
+            setCreatePatient({
               name: "" ,
               doctor: "", 
               phone: "", 
@@ -170,6 +164,10 @@ export default function Patients() {
               hasBloodPressure: false,
               hasSensitive: false,
             });
+          }
+           
+        }catch(error) {
+          return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
         }
   };
  //  ========================================================= //
@@ -201,11 +199,7 @@ export default function Patients() {
            if(response.status) {
              toast.success(MESSAGES.SUCCESS_CREATE_PATIENT);
              setIsModalOpen(false);
-           }
-       }catch(error) {
-            return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
-        }finally {
-          setCreatePatient({
+             setCreatePatient({
                name: "",
                doctor: "", 
                phone: "", 
@@ -215,7 +209,10 @@ export default function Patients() {
                hasBloodPressure: false,
                hasSensitive: false,
             });
-         }
+           }
+       }catch(error) {
+            return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
+        }
    };
  
    const handleToggleStatus = async (patient: string) => {
@@ -230,7 +227,7 @@ export default function Patients() {
    };
  //  ========================================================= //
 
-  // if(!user)return;
+  
   const employees = employeesData?.data || [];
 
     return (
@@ -256,8 +253,8 @@ export default function Patients() {
                         Cancel
                     </button>
                     {toggleButton ?
-                          <button disabled={isLoadingCreate || isErrorCreate} onClick={() => handleCreatePatient()}
-                                  type="button" className={` ${isLoadingCreate  || isErrorCreate ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
+                          <button disabled={isLoadingCreate} onClick={() => handleCreatePatient()}
+                                  type="button" className={` ${isLoadingCreate ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
                                   text-sm text-white bg-gray-800 py-1.5 px-3  hover:bg-gray-600 rounded-sm`}>
                                   {isLoadingCreate ? 
                                   <span><FontAwesomeIcon icon={faSpinner} spin /> create...</span>
@@ -266,8 +263,8 @@ export default function Patients() {
                                   }
                           </button>
                                   :
-                          <button disabled={isLoadingUpdate || isErrorUpdate} onClick={() => handleUpdatedPatient()}
-                                  type="button" className={` ${isErrorUpdate ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
+                          <button disabled={isLoadingUpdate} onClick={() => handleUpdatedPatient()}
+                                  type="button" className={` ${isLoadingUpdate ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
                                   text-sm text-white bg-gray-800 py-1.5 px-3  hover:bg-gray-600 rounded-sm`}>
                                   {isLoadingUpdate ? 
                                   <span><FontAwesomeIcon icon={faSpinner} spin /> updated...</span>
@@ -411,7 +408,7 @@ export default function Patients() {
                                    </div>
                                   :
                                   <>
-                                   { isLoading || isFetching  ?
+                                   { isLoading   ?
                                         <div>
                                           <div >
                                               <PageSkeletonLoader />
@@ -475,10 +472,15 @@ export default function Patients() {
                                                 type="button"
                                                 title="Reset password"
                                                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-slate-50 transition-all duration-100
-                                                  cursor-pointer active:scale-90 ${patient.isActive ? "hover:bg-emerald-600 bg-emerald-700 " : 
-                                                    "hover:bg-red-500 bg-red-700 "}`} 
+                                                   active:scale-90 ${patient.isActive ? "hover:bg-emerald-600 bg-emerald-700 " : 
+                                                    "hover:bg-red-500 bg-red-700 "} ${toggleIsLoading ? "opacity-30 cursor-not-allowed" :
+                                                       "opacity-100 cursor-pointer"}`} 
                                               >
+                                                {toggleIsLoading ?
+                                                  <FontAwesomeIcon className="text-sm" icon={faSpinner} spin />
+                                                  :
                                                   <FontAwesomeIcon className="text-sm" icon={patient.isActive ? faLockOpen : faLock} />
+                                                }
                                             </button>
                                          </div>
                                         )}

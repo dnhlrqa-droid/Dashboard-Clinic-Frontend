@@ -114,7 +114,7 @@ if(!user)return;
                             <button onClick={() => setOpenSelect("year")} className="text-gray-800 font-semibold cursor-pointer shadow shadow-gray-700/50 rounded-md transition-all
                              duration-100 hover:bg-gray-300 py-1 px-2 active:scale-90
                             ">Year</button>
-                           <ul onClick={() => setOpenSelect("")} className={`shadow shadow-gray-700/50 rounded-md  absolute top-10 -left-2 overflow-hidden z-50 bg-gray-50
+                           <ul onClick={() => setOpenSelect("")} className={`shadow shadow-gray-700/50 rounded-md  absolute top-10 -left-2 overflow-y-scroll z-50 bg-gray-50
                               transform transition-all duration-150 ${openSelect === "year" ? "max-h-10" : "h-0"}
                              `}>
                               {getAvailableYears().years.map((y, indx) => (

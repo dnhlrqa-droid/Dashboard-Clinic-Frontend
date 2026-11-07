@@ -26,8 +26,9 @@ export function errorCatch(error: unknown) {
       if(errorMessage.status === "TIMEOUT_ERROR") return MESSAGES.ERROR_NETWORK;
 
       if(Error.status === 429) return Error.data.message;
-      if(Error.status === 500) return MESSAGES.ERROR_SERVER;
+      if(Error.status === 500) return Error.data.message;
       if(Error.status === 401) return Error.data.message;
+      if(Error.status === 403) return Error.data.message;
 
       return MESSAGES.ERROR_SERVER
    

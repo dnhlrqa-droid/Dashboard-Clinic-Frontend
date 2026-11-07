@@ -37,7 +37,7 @@ export  function AppointmentStatusDropdown({
   }, []);
 
   const commitStatusChange = async (newStatus: AppointmentStatus) => {
-    
+    setIsOpen(false);
     try {
       const response = await toggleStatus({ appointmentId, status: newStatus }).unwrap();
       if (response.status) {
@@ -45,8 +45,6 @@ export  function AppointmentStatusDropdown({
       }
     } catch (error) {
       return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
-    } finally {
-      setIsOpen(false);
     }
   };
 
@@ -69,6 +67,7 @@ export  function AppointmentStatusDropdown({
         animate-[fadeInUp_0.15s_ease-out_forwards] ${availableTransitions.length === 0 ? "hidden" : ""}`}>
           {availableTransitions.map((statusOption) => (
             <button
+             disabled={isLoading}
               key={statusOption}
               type="button"
               onClick={() => commitStatusChange(statusOption)}

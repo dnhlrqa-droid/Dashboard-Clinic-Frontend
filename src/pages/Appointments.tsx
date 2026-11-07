@@ -4,7 +4,7 @@ import Crads from "../components/Crads"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import Modal from "../components/Modal"
 import { useState } from "react"
-import { useCreateAppoinmentAPIMutation, useGetAppointmentAPIQuery, useGetAppointmentTodayAPIQuery } from "../store/Appointment.Store"
+import { useCreateAppoinmentAPIMutation, useGetAppointmentTodayAPIQuery, useLazyGetAppointmentAPIQuery } from "../store/Appointment.Store"
 
 
 import {format} from "date-fns"
@@ -68,15 +68,15 @@ export default function Appointments() {
       notes: ""
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [toggleButtonColor, setToggleButtonColor] = useState("");
-    const [isAppointmentToday, setIsAppointmentToday] = useState(false);
+    const [toggleButtonStatus, setToggleButtonStatus] = useState("");
+    const [isAppointmentToday, setIsAppointmentToday] = useState(true);
     const [page, setPage] = useState(1);
 
 
-    const {data, isLoading, isError, refetch, isFetching} = useGetAppointmentAPIQuery({status: toggleButtonColor, page});
-    const [createAppointment, {isLoading: createIsLoading, isError: createIsError}] = useCreateAppoinmentAPIMutation();
+    const [targget, { data, isLoading, isError}] = useLazyGetAppointmentAPIQuery();
+    const [createAppointment, {isLoading: createIsLoading}] = useCreateAppoinmentAPIMutation();
     const {data: dataEmployee} = useGetEmployeeAPIQuery();
-    const {data: dataAppointmentToday} = useGetAppointmentTodayAPIQuery();
+    const {data: dataAppointmentToday, isLoading: AppointmentTodayLoading} = useGetAppointmentTodayAPIQuery();
 
     const patients = data?.data || [];
     const isLastPage = page * 20 >= patients.length;
@@ -135,8 +135,20 @@ export default function Appointments() {
     };
 
 
+  const handleGetAllAppointments = async (status?: string) => {
+    if(isAppointmentToday) {
+      setIsAppointmentToday(false);
+    }
+    setToggleButtonStatus(status || "");
+       try {    
+            await targget({status: status, page: page}).unwrap();
+          }catch(error) {
+          return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
+       }
+  };
 
-  const displayAppointment = isAppointmentToday ? dataAppointmentToday?.data : data?.data || [];
+
+  const displayAppointment = isAppointmentToday ? dataAppointmentToday?.data : data?.data ;
   const filteredAppointment  = displayAppointment ?  displayAppointment : [];
 
 
@@ -165,8 +177,8 @@ export default function Appointments() {
                                       ">
                                           Cancel
                                       </button>
-                                          <button disabled={createIsLoading || createIsError} onClick={() => handleCreateAppointment()}
-                                            type="button" className={` ${createIsLoading  || createIsError ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
+                                          <button disabled={createIsLoading} onClick={() => handleCreateAppointment()}
+                                            type="button" className={` ${createIsLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer opacity-100"}
                                             text-sm text-white bg-gray-800 py-1.5 px-3  hover:bg-gray-600 rounded-sm`}>
                                             {createIsLoading ? 
                                             <span><FontAwesomeIcon icon={faSpinner} spin /> create...</span>
@@ -197,7 +209,7 @@ export default function Appointments() {
                                                         name="doctor" id="doctor">
                                                         <option value="">doctor?</option>
                                                         {dataEmployee?.data.filter((e) => e.role === ROLES.DOCTOR).map((e) => (
-                                                          <option key={e._id} value={e._id}>Dr. {e.name}</option>
+                                                          <option key={e._id} value={e._id}>{e.name}</option>
                                                         ))}
                                                   </select>
                                             </label>
@@ -279,7 +291,7 @@ export default function Appointments() {
                               <div  className="px-4 py-10 text-center text-gray-700">
                                   <h1 className="text-2xl">Network Error</h1>
                                   <p className="text-lg">Make sure you are connected for the network.</p>
-                                  <button onClick={() => refetch()}
+                                  <button onClick={() => handleGetAllAppointments()}
                                    className="text-xl rounded-md cursor-pointer bg-blue-600 text-white hover:bg-blue-500
                                     transition-all duration-300 active:scale-90 mt-5 w-25 py-1
                                   "
@@ -290,7 +302,7 @@ export default function Appointments() {
                             </div>
                            :
                       <>
-                        { isLoading || isFetching  ?
+                        { isLoading || AppointmentTodayLoading ?
                                    <div >
                                        <PageSkeletonLoader />
                                    </div>
@@ -321,37 +333,42 @@ export default function Appointments() {
                           <div className="w-[95%] overflow-hidden rounded-xl border border-gray-200 bg-white shadow shadow-gray-700
                              max-h-150  overflow-y-scroll">
                              <div className="py-3 flex items-center justify-between px-5">
-                            <div>
-                                <button title="Appointments for today" onClick={() => {setIsAppointmentToday((prev) => !prev)}}
-                                  className="text-md text-blue-700 bg-blue-800/20 py-1 px-4 rounded-md cursor-pointer hover:bg-blue-700/50
-                                  transition-all duration-100 active:scale-90 font-semibold
-                                ">
+                            <div className="flex items-center space-x-4">
+                                 <button title="Appointments for today" onClick={() => {setIsAppointmentToday(true)}}
+                                  className={`text-md py-1 px-4 rounded-md cursor-pointer hover:bg-emerald-500/80
+                                    transition-all duration-100 active:scale-90 font-semibold bg-emerald-700 text-blue-50`}>
                                   Today
                                 </button>
+                                
+                                    <button title="All Appointments" onClick={() => {handleGetAllAppointments("")}}
+                                      className={`text-md py-1 px-4 rounded-md cursor-pointer hover:bg-blue-700/50
+                                      transition-all duration-100 active:scale-90 font-semibold bg-blue-800/20 text-blue-700`}>
+                                    All
+                                    </button>
                             </div>
                             <div className=" flex items-center justify-around rounded-md shadow-sm shadow-gray-500 py-.5 px-2 w-[50%]">
-                                 <button onClick={() => setToggleButtonColor("")}
-                                  className={`text-md text-blue-700 ${toggleButtonColor === "" ? "bg-blue-800/30" : ""} rounded-md
+                                 <button onClick={() => {handleGetAllAppointments("")}}
+                                  className={`text-md text-blue-700 ${toggleButtonStatus === "" ? "bg-blue-800/30" : ""} rounded-md
                                    py-1 px-5 my-1 cursor-pointer font-semibold hover:bg-blue-800/30`}>
                                     All
                                  </button>
-                                 <button onClick={() => setToggleButtonColor("Pending")}
-                                  className={`text-md text-blue-700 ${toggleButtonColor === "Pending" ? "bg-blue-800/30" : ""} rounded-md
+                                 <button onClick={() => {handleGetAllAppointments("Pending")}}
+                                  className={`text-md text-blue-700 ${toggleButtonStatus === "Pending" ? "bg-blue-800/30" : ""} rounded-md
                                    py-1 px-5 my-1 cursor-pointer font-semibold hover:bg-blue-800/30`}>
                                     Pending
                                  </button>
-                                 <button onClick={() => setToggleButtonColor("Completed")}
-                                  className={`text-md text-blue-700 ${toggleButtonColor === "Completed" ? "bg-blue-800/30" : ""} rounded-md
+                                 <button onClick={() => {handleGetAllAppointments("Completed")}}
+                                  className={`text-md text-blue-700 ${toggleButtonStatus === "Completed" ? "bg-blue-800/30" : ""} rounded-md
                                    py-1 px-5 my-1 cursor-pointer font-semibold hover:bg-blue-800/30`}>
                                     Completed
                                 </button>
-                                 <button onClick={() => setToggleButtonColor("Cancelled")}
-                                  className={`text-md text-blue-700 ${toggleButtonColor === "Cancelled" ? "bg-blue-800/30" : ""}
+                                 <button onClick={() => {handleGetAllAppointments("Cancelled")}}
+                                  className={`text-md text-blue-700 ${toggleButtonStatus === "Cancelled" ? "bg-blue-800/30" : ""}
                                    rounded-md py-1 px-5 my-1 cursor-pointer font-semibold hover:bg-blue-800/30`}>
                                     Cancelled
                                  </button>
-                                 <button onClick={() => setToggleButtonColor("no-show")}
-                                  className={`text-md text-blue-700 ${toggleButtonColor === "no-show" ? "bg-blue-800/30" : ""}
+                                 <button onClick={() => {handleGetAllAppointments("no-show")}}
+                                  className={`text-md text-blue-700 ${toggleButtonStatus === "no-show" ? "bg-blue-800/30" : ""}
                                    rounded-md py-1 px-5 my-1 cursor-pointer font-semibold min-w-30 hover:bg-blue-800/30`}>
                                     No Show
                                  </button>

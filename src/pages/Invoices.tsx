@@ -75,7 +75,7 @@ export function InvoicesPage() {
         notes: ''
     });
     
-    const {data, isLoading, isFetching, isError, refetch} = useGetInvocesAPIQuery({search: searchTerm, page: page, paymentStatus: toggleButtonColor});
+    const {data, isLoading, isError, refetch} = useGetInvocesAPIQuery({search: searchTerm, page: page, paymentStatus: toggleButtonColor});
     const [createTransaction, {isLoading: isLoadingCreate, isError: isErrorCreate}] = useCreateTransictionInvoicAPIMutation();
 
     const invoices = data?.data || [];
@@ -130,17 +130,16 @@ export function InvoicesPage() {
          if(response.status){
             toast.success("create transaction successfully.");
             setIsModalOpen(false);
-         }
-      }catch(error) {
-         return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
-      }finally {
-        setTransaction({
+            setTransaction({
             invoiceId: '',
             patientId: '',
             paymentMethod: '',
             amountPaid: 0,
             notes: ''
        });
+         }
+      }catch(error) {
+         return toast.error(errorCatch(error) || MESSAGES.ERROR_SERVER);
       }
     };
     
@@ -178,9 +177,18 @@ export function InvoicesPage() {
                     <div className="flex items-center justifu-center space-x-3">
                         <label className="w-full" htmlFor="Pay">
                         Pay
-                        <input value={transaction.amountPaid} onChange={(e) => setTransaction({ ...transaction, amountPaid:  Number(e.target.value)})}
+                        <input value={transaction.amountPaid} onChange={(e) => {
+                            const value = e.target.value;
+                           if(value === "") {
+                            return setTransaction({...transaction, amountPaid: 0});
+                           }
+                             const numValue = Number(value);
+                             if(!isNaN(numValue) || numValue < 0) {
+                               setTransaction({...transaction, amountPaid: numValue});
+                             }
+                         }}
                         className="p-2 rounded-sm shadow-sm shadow-gray-600 w-full outline-gray-300 outline-1 focus:outline-gray-500"
-                        type="number" id="Pay" placeholder="enter Pay" required name="pay"/>
+                        type="text" id="Pay" placeholder="enter Pay" required name="pay"/>
                     </label>
                     <label className="w-full" htmlFor="paymentMethod">
                         PaymentMethod
@@ -197,7 +205,7 @@ export function InvoicesPage() {
                         Nots
                         <input value={transaction.notes} onChange={(e) => setTransaction({...transaction, notes: e.target.value})}
                         className="p-2 rounded-sm shadow-sm shadow-gray-600 w-full outline-gray-300 outline-1 focus:outline-gray-500"
-                        type="nots" id="nots" placeholder="nots" required/>
+                        type="text" id="nots" placeholder="nots" required/>
                     </label>
               </form>
            </Modal>
@@ -239,7 +247,7 @@ export function InvoicesPage() {
                                    </div>
                                   :
                                   <>
-                                   { isLoading || isFetching  ?
+                                   { isLoading  ?
                                         <div>
                                           <div >
                                               <PageSkeletonLoader />
